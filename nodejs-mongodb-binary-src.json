@@ -296,18 +296,6 @@
       "description": "The exposed port of Node.js service."
     },
     {
-      "name": "GITHUB_WEBHOOK_SECRET",
-      "description": "A secret string used to configure the GitHub webhook",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}"
-    },
-    {
-      "name": "GENERIC_WEBHOOK_SECRET",
-      "description": "A secret string used to configure the Generic webhook",
-      "generate": "expression",
-      "from": "[a-zA-Z0-9]{40}"
-    },
-    {
       "name": "DATABASE_SERVICE_NAME",
       "description": "Database service name",
       "value": "mongodb"
