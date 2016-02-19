@@ -22,10 +22,9 @@
       },
       "spec": {
         "source": {
-          "type": "Git",
-          "git": {
-            "uri": "${SOURCE_REPOSITORY_URL}",
-            "ref": "${SOURCE_REPOSITORY_REF}"
+          "type": "Binary",
+          "binary": {
+            "asFile": "webapp.tar"
           },
           "contextDir": "${CONTEXT_DIR}"
         },
@@ -34,37 +33,16 @@
           "sourceStrategy": {
             "from": {
               "kind": "ImageStreamTag",
-              "namespace": "openshift",
-              "name": "nodejs:0.10"
+              "name": "node:${NODE_VERSION}"
             }
           }
         },
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "nodejs-mongodb-binary-src:latest"
+            "name": "${APPLICATION_NAME}:latest"
           }
-        },
-        "triggers": [
-          {
-            "type": "ImageChange"
-          },
-          {
-            "type": "ConfigChange"
-          },
-          {
-            "type": "GitHub",
-            "github": {
-              "secret": "${GITHUB_WEBHOOK_SECRET}"
-            }
-          },
-          {
-            "type": "Generic",
-            "generic": {
-              "secret": "${GENERIC_WEBHOOK_SECRET}"
-            }
-          }
-        ]
+        }
       }
     },
     {
@@ -300,13 +278,10 @@
       "required": true
     },
     {
-      "name": "SOURCE_REPOSITORY_URL",
-      "description": "The URL of the repository with your application source code",
-      "value": "https://github.com/openshift/nodejs-ex.git"
-    },
-    {
-      "name": "SOURCE_REPOSITORY_REF",
-      "description": "Set this to a branch name, tag or other ref of your repository if you are not using the default branch"
+      "name": "NODE_VERSION",
+      "description": "Tag of Node image. See https://hub.docker.com/_/node/",
+      "value": "latest",
+      "required": true
     },
     {
       "name": "CONTEXT_DIR",
