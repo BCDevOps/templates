@@ -2,7 +2,7 @@
   "kind": "Template",
   "apiVersion": "v1",
   "metadata": {
-    "name": "nodejs-mongodb-binary-src",
+    "name": "nodejs-mongodb-binary-docker",
     "creationTimestamp": null,
     "annotations": {
       "description": "An Node.js application from binary source input with a MongoDB database",
@@ -15,7 +15,7 @@
       "kind": "BuildConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-mongodb-binary-src",
+        "name": "nodejs-mongodb-binary-docker",
         "annotations": {
           "description": "Defines how to build the application"
         }
@@ -29,18 +29,12 @@
           "contextDir": "${CONTEXT_DIR}"
         },
         "strategy": {
-          "type": "Source",
-          "sourceStrategy": {
-            "from": {
-              "kind": "ImageStreamTag",
-              "name": "node:${NODE_VERSION}"
-            }
-          }
+          "type": "Docker"
         },
         "output": {
           "to": {
             "kind": "ImageStreamTag",
-            "name": "nodejs-mongodb-binary-src:latest"
+            "name": "nodejs-mongodb-binary-docker:latest"
           }
         }
       }
@@ -49,7 +43,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-mongodb-binary-src",
+        "name": "nodejs-mongodb-binary-docker",
         "annotations": {
           "description": "Keeps track of changes in the application image"
         }
@@ -69,7 +63,7 @@
       "kind": "DeploymentConfig",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-mongodb-binary-src",
+        "name": "nodejs-mongodb-binary-docker",
         "annotations": {
           "description": "Defines how to deploy the application server"
         }
@@ -84,11 +78,11 @@
             "imageChangeParams": {
               "automatic": true,
               "containerNames": [
-                "nodejs-mongodb-binary-src"
+                "nodejs-mongodb-binary-docker"
               ],
               "from": {
                 "kind": "ImageStreamTag",
-                "name": "nodejs-mongodb-binary-src:latest"
+                "name": "nodejs-mongodb-binary-docker:latest"
               }
             }
           },
@@ -98,20 +92,20 @@
         ],
         "replicas": 1,
         "selector": {
-          "name": "nodejs-mongodb-binary-src"
+          "name": "nodejs-mongodb-binary-docker"
         },
         "template": {
           "metadata": {
-            "name": "nodejs-mongodb-binary-src",
+            "name": "nodejs-mongodb-binary-docker",
             "labels": {
-              "name": "nodejs-mongodb-binary-src"
+              "name": "nodejs-mongodb-binary-docker"
             }
           },
           "spec": {
             "containers": [
               {
-                "name": "nodejs-mongodb-binary-src",
-                "image": "nodejs-mongodb-binary-src",
+                "name": "nodejs-mongodb-binary-docker",
+                "image": "nodejs-mongodb-binary-docker",
                 "ports": [
                   {
                     "containerPort": 8080
@@ -240,7 +234,7 @@
           }
         ],
         "selector": {
-          "name": "nodejs-mongodb-binary-src"
+          "name": "nodejs-mongodb-binary-docker"
         }
       }
     },
@@ -270,13 +264,13 @@
       "kind": "Route",
       "apiVersion": "v1",
       "metadata": {
-        "name": "nodejs-mongodb-binary-src"
+        "name": "nodejs-mongodb-binary-docker"
       },
       "spec": {
         "host": "${APPLICATION_DOMAIN}",
         "to": {
           "kind": "Service",
-          "name": "nodejs-mongodb-binary-src"
+          "name": "nodejs-mongodb-binary-docker"
         }
       }
     }
@@ -335,6 +329,6 @@
     }
   ],
   "labels": {
-    "template": "nodejs-mongodb-binary-src"
+    "template": "nodejs-mongodb-binary-docker"
   }
 }
