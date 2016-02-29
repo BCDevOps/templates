@@ -33,7 +33,7 @@
           "sourceStrategy": {
             "from": {
               "kind": "ImageStreamTag",
-              "name": "node:${NODE_VERSION}"
+              "name": "${BUILDER_IMAGE}:${NODE_VERSION}"
             }
           }
         },
@@ -59,10 +59,27 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "node"
+        "name": "${BUILDER_IMAGE}"
       },
       "spec": {
-        "dockerImageRepository": "node"
+        "dockerImageRepository": "${BUILDER_IMAGE}"
+      }
+    },
+    {
+      "kind": "PersistentVolumeClaim",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "${DATABASE_SERVICE_NAME}"
+      },
+      "spec": {
+        "accessModes": [
+          "ReadWriteOnce"
+        ],
+        "resources": {
+          "requests": {
+            "storage": "${VOLUME_CAPACITY}"
+          }
+        }
       }
     },
     {
@@ -215,7 +232,21 @@
                     "name": "MONGODB_ADMIN_PASSWORD",
                     "value": "${DATABASE_ADMIN_PASSWORD}"
                   }
+                ],
+                "volumeMounts": [
+                  {
+                    "name": "${DATABASE_SERVICE_NAME}-data",
+                    "mountPath": "/var/lib/mongodb/data"
+                  }
                 ]
+              }
+            ],
+            "volumes": [
+              {
+                "name": "${DATABASE_SERVICE_NAME}-data",
+                "persistentVolumeClaim": {
+                  "claimName": "${DATABASE_SERVICE_NAME}"
+                }
               }
             ]
           }
@@ -288,9 +319,15 @@
       "required": true
     },
     {
+      "name": "BUILDER_IMAGE",
+      "description": "Node builder image",
+      "value": "node",
+      "required": true
+    },
+    {
       "name": "NODE_VERSION",
-      "description": "Tag of Node image. See https://hub.docker.com/_/node/",
-      "value": "latest",
+      "description": "Tag of node builder image. See https://hub.docker.com/_/node/",
+      "value": "onbuild",
       "required": true
     },
     {
@@ -332,6 +369,13 @@
       "description": "Password for the database admin user",
       "generate": "expression",
       "from": "[a-zA-Z0-9]{16}"
+    },
+    {
+      "name": "VOLUME_CAPACITY",
+      "displayName": "Volume capacity",
+      "description": "Volume space available for data, e.g. 512Mi, 2Gi",
+      "value": "512Mi",
+      "required": true
     }
   ],
   "labels": {
