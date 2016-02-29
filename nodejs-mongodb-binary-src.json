@@ -33,7 +33,7 @@
           "sourceStrategy": {
             "from": {
               "kind": "ImageStreamTag",
-              "name": "${BUILDER_IMAGE}:${NODE_VERSION}"
+              "name": "${APPLICATION_NAME}-builder-image:${NODE_VERSION}"
             }
           }
         },
@@ -59,7 +59,7 @@
       "kind": "ImageStream",
       "apiVersion": "v1",
       "metadata": {
-        "name": "${BUILDER_IMAGE}"
+        "name": "${APPLICATION_NAME}-builder-image"
       },
       "spec": {
         "dockerImageRepository": "${BUILDER_IMAGE}"
