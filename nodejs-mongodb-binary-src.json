@@ -34,7 +34,8 @@
             "from": {
               "kind": "ImageStreamTag",
               "name": "${APPLICATION_NAME}-builder-image:${NODE_VERSION}"
-            }
+            },
+            "incremental": true
           }
         },
         "output": {
