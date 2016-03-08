@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: Template
+labels:
+  template: dockerfile-over-git
+metadata:
+  annotations:
+    description: An instant app built using Dockerfile pulled from Git
+    tags: instant-app,docker
+  name: dockerfile-over-git
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to build the application
+    name: dockerfile-over-git
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: dockerfile-over-git:latest
+    source:
+      contextDir: ${CONTEXT_DIR}
+      git:
+        ref: ${SOURCE_REPOSITORY_REF}
+        uri: ${SOURCE_REPOSITORY_URL}
+      type: Git
+    strategy:
+      type: Docker
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: dockerfile-over-git-builder-image:${BUILDER_IMAGE_TAG}
+    triggers:
+    - type: ImageChange
+    - github:
+        secret: ${GITHUB_WEBHOOK_SECRET}
+      type: GitHub
+    - generic:
+        secret: ${GENERIC_WEBHOOK_SECRET}
+      type: Generic
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application image
+    name: dockerfile-over-git
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Builder Image
+    name: dockerfile-over-git-builder-image
+  spec:
+    dockerImageRepository: ${BUILDER_IMAGE}
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      description: Defines how to deploy the application server
+    name: dockerfile-over-git
+  spec:
+    replicas: 1
+    selector:
+      name: dockerfile-over-git
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          name: dockerfile-over-git
+        name: dockerfile-over-git
+      spec:
+        containers:
+        - env:
+          image: dockerfile-over-git
+          name: dockerfile-over-git
+          ports:
+          - containerPort: 8080
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - dockerfile-over-git
+        from:
+          kind: ImageStreamTag
+          name: dockerfile-over-git:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: dockerfile-over-git
+  spec:
+    ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+    selector:
+      name: dockerfile-over-git
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${APPLICATION_NAME}
+  spec:
+    host:
+    to:
+      kind: Service
+      name: dockerfile-over-git
+parameters:
+- description: The name of the application
+  name: APPLICATION_NAME
+  from: '[a-z-_]{2}[a-z-_0-9]*'
+  generate: expression
+  value: myApp
+  required: true
+- description: The URL of the repository containing Dockerfile
+  name: SOURCE_REPOSITORY_URL
+  required: true
+- description: Set this to a branch name, tag or other ref of your repository if you
+    are not using the default branch
+  name: SOURCE_REPOSITORY_REF
+- description: Set this to the relative path to Dockerfile if it is not in the root
+    of your repository
+  name: CONTEXT_DIR
+- description: Builder image name. This is the image name in FROM clause of Dockerfile before colon. For example, node.
+  name: BUILDER_IMAGE
+  required: true
+- description: Builder image tag. This is the image tag in FROM clause of Dockerfile after colon. For example, 4.2-onbuild.
+  name: BUILDER_IMAGE_TAG
+  required: true
+  value: latest
+- description: A secret string used to configure the GitHub webhook
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GITHUB_WEBHOOK_SECRET
+- description: A secret string used to configure the Generic webhook
+  from: '[a-zA-Z0-9]{40}'
+  generate: expression
+  name: GENERIC_WEBHOOK_SECRET
