@@ -30,7 +30,7 @@ objects:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: dockerfile-over-git-builder-image:${BUILDER_IMAGE_TAG}
+          name: dockerfile-over-git-builder-image:${BASE_IMAGE_TAG}
     triggers:
     - type: ImageChange
     - github:
@@ -52,7 +52,7 @@ objects:
       description: Builder Image
     name: dockerfile-over-git-builder-image
   spec:
-    dockerImageRepository: ${BUILDER_IMAGE}
+    dockerImageRepository: ${BASE_IMAGE}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -123,11 +123,11 @@ parameters:
 - description: Set this to the relative path to Dockerfile if it is not in the root
     of your repository
   name: CONTEXT_DIR
-- description: Builder image name. This is the image name in FROM clause of Dockerfile before colon. For example, node.
-  name: BUILDER_IMAGE
+- description: Base image name. This is the image name in FROM clause of Dockerfile before colon. For example, node.
+  name: BASE_IMAGE
   required: true
-- description: Builder image tag. This is the image tag in FROM clause of Dockerfile after colon. For example, 4.2-onbuild.
-  name: BUILDER_IMAGE_TAG
+- description: Base image tag. This is the image tag in FROM clause of Dockerfile after colon. For example, 4.2-onbuild.
+  name: BASE_IMAGE_TAG
   required: true
   value: onbuild
 - description: A secret string used to configure the GitHub webhook
