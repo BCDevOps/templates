@@ -129,7 +129,7 @@ parameters:
 - description: Base image tag. This is the image tag in FROM clause of Dockerfile after colon. For example, 4.2-onbuild.
   name: BASE_IMAGE_TAG
   required: true
-  value: onbuild
+  value: latest
 - description: A secret string used to configure the GitHub webhook
   from: '[a-zA-Z0-9]{40}'
   generate: expression
