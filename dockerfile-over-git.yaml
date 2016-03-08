@@ -75,8 +75,6 @@ objects:
         - env:
           image: dockerfile-over-git
           name: dockerfile-over-git
-          ports:
-          - containerPort: 8080
     triggers:
     - imageChangeParams:
         automatic: true
@@ -110,11 +108,11 @@ objects:
       kind: Service
       name: dockerfile-over-git
 parameters:
-- description: The name of the application
+- description: The name of the application matching Regex [a-z-_]{2}[a-z-_0-9]*
   name: APPLICATION_NAME
   from: '[a-z-_]{2}[a-z-_0-9]*'
   generate: expression
-  value: myApp
+  value: my-app
   required: true
 - description: The URL of the repository containing Dockerfile
   name: SOURCE_REPOSITORY_URL
@@ -131,7 +129,7 @@ parameters:
 - description: Builder image tag. This is the image tag in FROM clause of Dockerfile after colon. For example, 4.2-onbuild.
   name: BUILDER_IMAGE_TAG
   required: true
-  value: latest
+  value: onbuild
 - description: A secret string used to configure the GitHub webhook
   from: '[a-zA-Z0-9]{40}'
   generate: expression
