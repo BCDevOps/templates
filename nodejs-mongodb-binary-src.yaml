@@ -141,7 +141,7 @@ objects:
             - name: MONGODB_PASSWORD
               value: ${DATABASE_PASSWORD}
             - name: MONGODB_DATABASE
-              value: ${DATABASE_DATABASE}
+              value: ${DATABASE_NAME}
             - name: MONGODB_ADMIN_PASSWORD
               value: ${DATABASE_ADMIN_PASSWORD}
             image: mongodb
