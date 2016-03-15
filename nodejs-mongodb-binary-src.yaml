@@ -115,66 +115,71 @@ objects:
                   name: "MONGODB_ADMIN_PASSWORD"
                   value: "${DATABASE_ADMIN_PASSWORD}"
   -
-    kind: "DeploymentConfig"
-    apiVersion: "v1"
+    apiVersion: v1
+    kind: DeploymentConfig
     metadata:
       name: "${DATABASE_SERVICE_NAME}"
       annotations:
         description: "Defines how to deploy the database"
     spec:
-      strategy:
-        type: "Recreate"
-      triggers:
-        -
-          type: "ImageChange"
-          imageChangeParams:
-            automatic: false
-            containerNames:
-              - "mongodb"
-            from:
-              kind: "ImageStreamTag"
-              namespace: "openshift"
-              name: "mongodb:2.6"
-        -
-          type: "ConfigChange"
       replicas: 1
       selector:
-        name: "${DATABASE_SERVICE_NAME}"
+        name: ${DATABASE_SERVICE_NAME}
+      strategy:
+        type: Recreate
       template:
         metadata:
-          name: "${DATABASE_SERVICE_NAME}"
+          creationTimestamp: null
           labels:
-            name: "${DATABASE_SERVICE_NAME}"
+            name: ${DATABASE_SERVICE_NAME}
         spec:
           containers:
-            -
-              name: "mongodb"
-              image: "mongodb"
-              ports:
-                -
-                  containerPort: 27017
-              env:
-                -
-                  name: "MONGODB_USER"
-                  value: "${DATABASE_USER}"
-                -
-                  name: "MONGODB_PASSWORD"
-                  value: "${DATABASE_PASSWORD}"
-                -
-                  name: "MONGODB_DATABASE"
-                  value: "${DATABASE_NAME}"
-                -
-                  name: "MONGODB_ADMIN_PASSWORD"
-                  value: "${DATABASE_ADMIN_PASSWORD}"
-              volumeMounts:
-                -
-                  name: "${DATABASE_SERVICE_NAME}-data"
-                  mountPath: "/var/lib/mongodb/data"
+          - capabilities: {}
+            env:
+            - name: MONGODB_USER
+              value: ${DATABASE_USER}
+            - name: MONGODB_PASSWORD
+              value: ${DATABASE_PASSWORD}
+            - name: MONGODB_DATABASE
+              value: ${DATABASE_DATABASE}
+            - name: MONGODB_ADMIN_PASSWORD
+              value: ${DATABASE_ADMIN_PASSWORD}
+            image: mongodb
+            imagePullPolicy: IfNotPresent
+            name: mongodb
+            ports:
+            - containerPort: 27017
+              protocol: TCP
+            readinessProbe:
+              initialDelaySeconds: 15
+              tcpSocket:
+                port: 27017
+              timeoutSeconds: 1
+            securityContext:
+              capabilities: {}
+              privileged: false
+            terminationMessagePath: /dev/termination-log
+            volumeMounts:
+            - mountPath: /var/lib/mongodb/data
+              name: ${DATABASE_SERVICE_NAME}-data
+          dnsPolicy: ClusterFirst
+          restartPolicy: Always
           volumes:
-            -
-              name: "${DATABASE_SERVICE_NAME}-data"
-              persistentVolumeClaim:
-                claimName: "${DATABASE_SERVICE_NAME}"
+          - name: ${DATABASE_SERVICE_NAME}-data
+            persistentVolumeClaim:
+              claimName: ${DATABASE_SERVICE_NAME}
+      triggers:
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+          - mongodb
+          from:
+            kind: ImageStreamTag
+            name: mongodb:latest
+            namespace: openshift
+          lastTriggeredImage: ""
+        type: ImageChange
+      - type: ConfigChange
   -
     kind: "Service"
     apiVersion: "v1"
